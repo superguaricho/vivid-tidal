@@ -1,0 +1,66 @@
+#+TITLE: Vivid-Tidal-El
+#+AUTHOR: Numa Tortolero
+#+EMAIL: numa.tortolero@gmail.com
+#+LANGUAGE: en
+
+* Overview
+*Vivid-Tidal-El* is an Emacs interface for the [[https://github.com/superguaricho/vivid-tidal][vivid-tidal]] Haskell package. It allows you to manage and interact with all the resources of the =vivid-tidal= ecosystem directly from Emacs, facilitating a seamless live-coding workflow that combines pattern generation and sound synthesis.
+
+** Key Features
+- **Haskell Package Management**: Install and uninstall the =vivid-tidal= Haskell package (which automatically includes TidalCycles and Vivid).
+- **SuperCollider Integration**: Install the =SuperDirt= Quark and manage =sclang= processes.
+- **Automated Environment**: Boot SuperCollider and GHCi with all necessary modules and synchronization.
+- **Live Coding**: Send code blocks and lines from Emacs buffers to the synchronized GHCi session.
+
+* Prerequisites
+- *Emacs* 27.1 or later.
+- *SuperCollider* installed and accessible in your PATH.
+- *Haskell* (GHC and Cabal) installed.
+- Emacs Dependencies: =sclang-mode=, =haskell-mode=, =osc.el=, =haskell-live=.
+
+* Installation & Setup
+Follow these steps to set up your environment:
+
+** 1. Load the Package
+Add the project directory to your Emacs =load-path= and require the module:
+#+begin_src elisp
+(add-to-list 'load-path "/path/to/vivid-tidal-el")
+(require 'vivid-tidal-start)
+#+end_src
+
+** 2. Install SuperDirt
+Run the following command to install the SuperDirt Quark (requires SuperCollider to be installed):
+=M-x vivid-tidal-superdirt-install=
+
+** 3. Install the Haskell Package
+Run the following command to clone and build the =vivid-tidal= Haskell package locally:
+=M-x vivid-tidal-install=
+This will also set up the necessary GHCi scripts.
+
+* Usage & Workflow
+
+** Recommended Workflow
+1. **Start the System**: Run =M-x vivid-tidal-start= (or use the alias =M-x turpial=). This boots SuperCollider, SuperDirt, and GHCi.
+2. **Live Coding**: Open a Haskell file and start writing patterns or synth interactions.
+3. **Interact**: Send code to the REPL (see [[*Interaction][Interaction]] below).
+4. **Shutdown**: Use =M-x vivid-tidal-start-kill= (or =C-c z=) to close everything cleanly.
+
+** Interaction
+By default, you can interact with the GHCi session using standard =haskell-mode= or =haskell-live= commands:
+- **C-c C-c**: Send the current line or active region to the REPL.
+- **C-c z**: Kill the session and close all related buffers/processes.
+
+** Uninstallation
+To remove the local Haskell installation and scripts:
+=M-x vivid-tidal-install-clean-installation=
+
+* Synthesizer Details
+For detailed instructions on how to create and manage Synths using Vivid within this environment, please refer to the documentation in the [[https://github.com/superguaricho/vivid-tidal][vivid-tidal Haskell repository]].
+
+* License
+Distributed under the MIT License.
+
+---
+
+* Resumen (Español)
+*Vivid-Tidal-El* permite interactuar con el paquete Haskell [[https://github.com/superguaricho/vivid-tidal][vivid-tidal]] desde Emacs. Proporciona comandos para instalar localmente el paquete (incluyendo Tidal y Vivid), instalar el Quark SuperDirt, y arrancar todo el entorno sincronizado de SuperCollider y GHCi para live coding. Utiliza =M-x vivid-tidal-start= para comenzar y =C-c z= para cerrar el sistema de forma limpia.
