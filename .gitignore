@@ -21,3 +21,5 @@ custom.el
 # Haskell/Cabal artifacts (if any leaks into this dir)
 dist-newstyle/
 .stack-work/
+notes
+agyresume
