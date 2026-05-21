@@ -27,7 +27,7 @@
 
 (require 'sclang)
 (require 'tidal-osc)
-(require 'tidal-superdirt-install)
+(require 'vivid-tidal-superdirt-install)
 
 (declare-function haskell-interactive-switch "haskell")
 
@@ -66,6 +66,7 @@
   (and vivid-tidal-osc-server
     (process-status vivid-tidal-osc-server)
     (delete-process vivid-tidal-osc-server)))
+
 (defun vivid-tidal-start-emacs-osc-listener ()
   "Restart the OSC listener in Emacs on port 7777."
   (interactive)

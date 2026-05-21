@@ -319,84 +319,88 @@ in do
 
 (defconst vivid-tidal-install-ghci-loadme-string
   (format "
-    :cd %s
-    :set +m
+:cd %s
+:set +m
 
-    :set prompt \"\"
-    :set prompt-cont \"\"
+:set prompt \"\"
+:set prompt-cont \"\"
 
-    :set -fno-warn-orphans -Wno-type-defaults -XMultiParamTypeClasses -XOverloadedStrings
-    :set prompt \"\"
+:set -fno-warn-orphans -Wno-type-defaults -XMultiParamTypeClasses -XOverloadedStrings
+:set prompt \"\"
 
-    -- Import all the boot functions and aliases.
-    import Sound.Tidal.Boot
+-- Import all the boot functions and aliases.
+import Sound.Tidal.Boot
 
-    default (Rational, Integer, Double, Pattern String)
+default (Rational, Integer, Double, Pattern String)
 
-    -- Create a Tidal Stream with the default settings.
-    -- To customize these settings, use 'mkTidalWith' instead
-    tidalInst <- mkTidal
+-- Create a Tidal Stream with the default settings.
+-- To customize these settings, use 'mkTidalWith' instead
+tidalInst <- mkTidal
 
-    -- tidalInst <- mkTidalWith [(superdirtTarget { oLatency = 0.01 }, [superdirtShape])] (defaultConfig {cFrameTimespan = 1/50, cProcessAhead = 1/20})
+-- tidalInst <- mkTidalWith [(superdirtTarget { oLatency = 0.01 }, [superdirtShape])] (defaultConfig {cFrameTimespan = 1/50, cProcessAhead = 1/20})
 
-    -- This orphan instance makes the boot aliases work!
-    -- It has to go after you define 'tidalInst'.
-    instance Tidally where tidal = tidalInst
+-- This orphan instance makes the boot aliases work!
+-- It has to go after you define 'tidalInst'.
+instance Tidally where tidal = tidalInst
 
-    -- `enableLink` and `disableLink` can be used to toggle synchronisation using the Link protocol.
-    -- Uncomment the next line to enable Link on startup.
-    -- enableLink
+-- `enableLink` and `disableLink` can be used to toggle synchronisation using the Link protocol.
+-- Uncomment the next line to enable Link on startup.
+-- enableLink
 
-    -- You can also add your own aliases in this file. For example:
-    -- fastsquizzed pat = fast 2 $ pat # squiz 1.5
+-- You can also add your own aliases in this file. For example:
+-- fastsquizzed pat = fast 2 $ pat # squiz 1.5
 
-    :set -XOverloadedStrings
+:set -XOverloadedStrings
 
-    import           Vivid as V
+import   Vivid as V
 
-    t = sd (0 :: I \"note\") $ do
+:{
+t = sd (0 :: I \"note\") $ do
     e <- line (start_ 0.2, end_ 0, duration_ 0.8, doneAction_ 2)
     w <- sinOsc (freq_ $ midiCPS (V :: V \"note\"))
     s <- e ~* w
     out 0 [s, s]
 
-    playNote :: SynthDef '[\"note\"] -> I \"note\" -> Float -> IO ()
-    playNote s f d = do synth s (f :: I \"note\") >> V.wait d
+playNote :: SynthDef '[\"note\"] -> I \"note\" -> Float -> IO ()
+playNote s f d = do synth s (f :: I \"note\") >> V.wait d
+:}
 
-    -- do playNote t 60 0.25 >> playNote t 67 0.25 >> playNote t 72 2.0
+-- do playNote t 60 0.25 >> playNote t 67 0.25 >> playNote t 72 2.0
 
-    data Note a = Note Int Float
+data Note a = Note Int Float
 
-    pitch' (Note p _) = p
+pitch' (Note p _) = p
 
-    dur' (Note _ d) = d
+dur' (Note _ d) = d
 
-    playNotes :: SynthDef '[\"note\"] -> [Note a] -> IO ()
-    playNotes _ [] = return ()
-    playNotes s (n : ns) = do
+:{
+playNotes :: SynthDef '[\"note\"] -> [Note a] -> IO ()
+playNotes _ [] = return ()
+playNotes s (n : ns) = do
     playNote s (fromIntegral (pitch' n)) (dur' n)
     playNotes s ns
+:}
 
-    notes = [Note 60 0.25, Note 67 0.25, Note 72 2.0]
+notes = [Note 60 0.25, Note 67 0.25, Note 72 2.0]
 
-    vividSplash = unlines $ [
-                              \"____   ____.__      .__    .___\",
-                              \"\\   \\ /   /|__|__  _|__| __| _/\",
-                              \" \\   y   / |  \\  \\/ /  |/ __ | \",
-                              \"  \\     /  |  |\\   /|  / /_/ | \",
-                              \"   \\___/   |__| \\_/ |__\\____ | \",
-                              \" \",
-                              \"Sound synthesis with SuperCollider.\",
-                              \"(c) 2024 Vivid, Tom Murphy.\",
-                              \" \"]
+vividSplash = unlines $ [
+                          \"____   ____.__      .__    .___\",
+                          \"\\\\   \\\\ /   /|__|__  _|__| __| _/\",
+                          \" \\\\   y   / |  \\\\  \\\\/ /  |/ __ | \",
+                          \"  \\\\     /  |  |\\\\   /|  / /_/ | \",
+                          \"   \\\\___/   |__| \\\\_/ |__\\\\____ | \",
+                          \" \",
+                          \"Sound synthesis with SuperCollider.\",
+                          \"(c) 2024 Vivid, Tom Murphy.\",
+                          \" \"]
 
-    main = do playNotes t notes >> putStrLn vividSplash
+main = do playNotes t notes >> putStrLn vividSplash
 
-    main
+main
 
-    :set prompt \"tidal> \"
-    :set prompt \"\\4\"
-    "
+:set prompt \"tidal> \"
+:set prompt \"\\4\"
+"
     vivid-tidal-install-dir)
   "template for the vivid-tidal.ghci file with emacs support.")
 
