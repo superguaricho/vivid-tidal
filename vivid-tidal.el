@@ -1,12 +1,13 @@
-;;; vivid-tidal-start.el --- Start vivid-tidal in GHCi and SuperCollider
+;;; vivid-tidal.el --- Start vivid-tidal in GHCi and SuperCollider -*- lexical-binding: t -*-
 ;;
-;; Filename: vivid-tidal-start.el
+;; Filename: vivid-tidal.el
 ;; Description: Start vivid-tidal in GHCi and SuperCollider
 ;; Author: Numa Tortolero
 ;; Maintainer: Numa Tortolero
 ;; Created: vie may  8 11:51:51 2026 (-0400)
-;; Version: 0.1.0.2
-;; URL: https://github.com/superguaricho/vivid-tidal
+;; Version: 0.1.0.4
+;; Package-Requires: ((osc "0.4") (haskell-mode "17.5"))
+;; URL: https://github.com/superguaricho/vivid-tidal-el
 ;; Keywords: haskell tidal supercollider live-coding
 ;; Compatibility: GNU Emacs 29.0.50
 ;;
@@ -31,48 +32,50 @@
 
 (require 'haskell-live)
 (require 'sclang)
-(require 'sclang-ext-layout-for-3 nil t)
+(require 'vivid-tidal-layouts nil t)
 (require 'vivid-tidal-superdirt-install nil t)
 (require 'vivid-tidal-install nil t)
 (require 'vivid-tidal-superdirt-start nil t)
 
-(defvar vivid-tidal-start-session-name "vivid-tidal"
+;; (package-install-file (file-name-directory (or load-file-name buffer-file-name)))
+
+(defvar vivid-tidal-session-name "vivid-tidal"
   "The name of the GHCi session for vivid-tidal.")
 
-(defvar vivid-tidal-start-version "0.1.0.0"
+(defvar vivid-tidal-version "0.1.0.0"
   "The version of the vivid-tidal package.")
 
-(defvar vivid-tidal-start-haskell-dir
+(defvar vivid-tidal-haskell-dir
   (expand-file-name "~/.local/share/haskell")
   "The directory where the haskell scripts for vivid-tidal are located.")
 
-(defvar vivid-tidal-start-path
+(defvar vivid-tidal-path
   (expand-file-name (format "%s/%s"
-                      vivid-tidal-start-haskell-dir
-                      vivid-tidal-start-session-name))
+                      vivid-tidal-haskell-dir
+                      vivid-tidal-session-name))
   "The path to the vivid-tidal package.")
 
-(defvar vivid-tidal-start-repl-buffer
-  (format "*%s*" vivid-tidal-start-session-name)
+(defvar vivid-tidal-repl-buffer
+  (format "*%s*" vivid-tidal-session-name)
   "The name of the buffer for vivid-tidal session.")
 
-(defvar vivid-tidal-start-ghci-script
+(defvar vivid-tidal-ghci-script
   (expand-file-name
-    (format "%s%s.ghci" vivid-tidal-start-session-name "-emacs")
-    vivid-tidal-start-path)
+    (format "%s%s.ghci" vivid-tidal-session-name "-emacs")
+    vivid-tidal-path)
   "The name of the GHCi script to load vivid-tidal.")
 
-(defvar vivid-tidal-start-command
-  (let ((script vivid-tidal-start-ghci-script))
+(defvar vivid-tidal-command
+  (let ((script vivid-tidal-ghci-script))
     (if (file-exists-p script)
       (format ":script %s" script)
       nil))
   "Command to load tidalcycles in ghci.")
 
-(defvar vivid-tidal-start--target-buffer-name nil
+(defvar vivid-tidal--target-buffer-name nil
   "Internal variable to store the name of the buffer to be linked.")
 
-(defconst vivid-tidal-start-test-string
+(defconst vivid-tidal-test-string
   ":{
 import Vivid as V
 
@@ -88,32 +91,32 @@ do playNote t 60 0.25 >> playNote t 67 0.25 >> playNote t 72 2.0
 :}
 ")
 
-(defvar vivid-tidal-start-test t
+(defvar vivid-tidal-test t
   "Whether to play test notes on startup.")
 
 (declare-function tidal-layout-3 "tidal-layouts" () t)
 
-(defun vivid-tidal-start-send-command (command)
+(defun vivid-tidal-send-command (command)
   "Send COMMAND to the vivid-tidal session."
   (let* ((session (haskell-live-get-session-by-name
-                    vivid-tidal-start-session-name))
+                    vivid-tidal-session-name))
           (proc (and session (haskell-session-process session))))
     (and proc (process-live-p (haskell-process-process proc))
       (haskell-process-send-string proc command))))
 
-(defun vivid-tidal-start-boot ()
+(defun vivid-tidal-boot ()
   "Send the `:boot' command to the vivid-tidal session."
   (interactive)
-  (vivid-tidal-start-send-command ":boot"))
+  (vivid-tidal-send-command ":boot"))
 
-(defun vivid-tidal-start-test ()
-  "Send the `vivid-tidal-start-test-string' command to the vivid-tidal session."
+(defun vivid-tidal-test ()
+  "Send the `vivid-tidal-test-string' command to the vivid-tidal session."
   (interactive)
-  (vivid-tidal-start-send-command vivid-tidal-start-test-string))
+  (vivid-tidal-send-command vivid-tidal-test-string))
 
-(setq vivid-tidal-start-test nil)
+(setq vivid-tidal-test nil)
 
-(defun vivid-tidal-start-startup ()
+(defun vivid-tidal-startup ()
   "This function runs when GHCi is starting.
 Synchronized via GHCi script prompt \\4."
   (interactive)
@@ -126,7 +129,7 @@ Synchronized via GHCi script prompt \\4."
             :state proc
             :go (lambda (p)
                   (haskell-process-send-string p
-                    vivid-tidal-start-command)
+                    vivid-tidal-command)
                   (message
                     "⏳ Initializing vivid-tidal with vivid-tidal.ghci..."))))
         (haskell-process-queue-command
@@ -138,9 +141,9 @@ Synchronized via GHCi script prompt \\4."
                   (message "🚀 Booting Tidal/Vivid environment..."))
             :complete (lambda (p _)
                         (when (fboundp 'tidal-layout-3) (tidal-layout-3))
-                        (and vivid-tidal-start-test
+                        (and vivid-tidal-test
                           (haskell-process-send-string p
-                            vivid-tidal-start-test-string))
+                            vivid-tidal-test-string))
                         (message "✨ vivid-tidal ready and synchronized!")))))
       (message "⚠️ Haskell process has not been found."))))
 
@@ -148,60 +151,60 @@ Synchronized via GHCi script prompt \\4."
   "List of functions to run when SuperDirt starts up.")
 
 ;;;###autoload
-(defun vivid-tidal-start-run ()
+(defun vivid-tidal-run ()
   "Run interactive vivid-tidal process."
   (interactive)
   (message "🚀 Triggering vivid-tidal Haskell startup...")
-  (remove-hook 'sclang-library-startup-hook 'vivid-tidal-start-run)
+  (remove-hook 'sclang-library-startup-hook 'vivid-tidal-run)
   (let ((haskell-buffer (haskell-live-get-haskell-buffer)))
-    (if (not (get-buffer vivid-tidal-start-repl-buffer))
-      (let* ((session (haskell-live-get-session-by-name vivid-tidal-start-session-name))
+    (if (not (get-buffer vivid-tidal-repl-buffer))
+      (let* ((session (haskell-live-get-session-by-name vivid-tidal-session-name))
               (proc (and session (haskell-session-process session))))
         (and proc (process-live-p (haskell-process-process proc))
           (kill-process (haskell-process-process proc)))
         (setq haskell-process-type 'cabal-repl)
-        (message "🔄 starting %s session..." vivid-tidal-start-session-name)
+        (message "🔄 starting %s session..." vivid-tidal-session-name)
         (if haskell-buffer
           (with-current-buffer haskell-buffer
             (haskell-live-process-start
-              vivid-tidal-start-session-name
-              vivid-tidal-start-path
+              vivid-tidal-session-name
+              vivid-tidal-path
               nil
-              'vivid-tidal-start-startup))
+              'vivid-tidal-startup))
           (haskell-live-process-start
-            vivid-tidal-start-session-name
-            vivid-tidal-start-path
+            vivid-tidal-session-name
+            vivid-tidal-path
             nil
-            'vivid-tidal-start-startup)))
-      (haskell-live-add-to-session vivid-tidal-start-session-name))))
+            'vivid-tidal-startup)))
+      (haskell-live-add-to-session vivid-tidal-session-name))))
 
 ;;;###autoload
-(defun vivid-tidal-start-sclang ()
+(defun vivid-tidal-sclang ()
   "Start sclang and wait for SuperDirt to be ready before starting vivid-tidal."
   (interactive)
   (require 'tidal-superdirt-start)
-  (add-to-list 'vivid-tidal-superdirt-startup-functions #'vivid-tidal-start-run)
+  (add-to-list 'vivid-tidal-superdirt-startup-functions #'vivid-tidal-run)
   (let ((proc (get-process sclang-process)))
     (if (and proc (process-live-p proc))
       (tidal-start-superdirt)
       (sclang-start))))
 
-(keymap-set haskell-mode-map "C-c >" #'vivid-tidal-start-sclang)
+(keymap-set haskell-mode-map "C-c >" #'vivid-tidal-sclang)
 
-(defalias 'turpial 'vivid-tidal-start-sclang)
-
-;;;###autoload
-(defalias 'vivid-tidal-start 'vivid-tidal-start-sclang)
+(defalias 'turpial 'vivid-tidal-sclang)
 
 ;;;###autoload
-(defun vivid-tidal-start-tidal ()
+(defalias 'vivid-tidal 'vivid-tidal-sclang)
+
+;;;###autoload
+(defun vivid-tidal-tidal ()
   "Restart the vivid-tidal session."
   (interactive)
-  (haskell-process-show-repl-response vivid-tidal-start-command))
+  (haskell-process-show-repl-response vivid-tidal-command))
 
 ;;;
 
-(defun vivid-tidal-start-kill-sc-buffers ()
+(defun vivid-tidal-kill-sc-buffers ()
   "Kill the supercollider buffers."
   (interactive)
   (let ((wsbuf (get-buffer "*SClang:Workspace*"))
@@ -209,29 +212,29 @@ Synchronized via GHCi script prompt \\4."
     (and wsbuf (kill-buffer wsbuf))
     (and postbuf (kill-buffer postbuf))))
 
-(defun vivid-tidal-start-kill-sclang ()
+(defun vivid-tidal-kill-sclang ()
   "Kill the supercollider system."
   (interactive)
   (sclang-kill)
-  (vivid-tidal-start-kill-sc-buffers))
+  (vivid-tidal-kill-sc-buffers))
 
 ;;;###autoload
-(defun vivid-tidal-start-kill ()
+(defun vivid-tidal-kill ()
   "kill the ghci vivid-tidal session."
   (interactive)
   (let ((main-buffer (current-buffer)))
     (and (or (get-process sclang-process)
            (get-buffer sclang-post-buffer))
       (kill-sclang))
-    (and (get-buffer vivid-tidal-start-repl-buffer)
-      (kill-buffer vivid-tidal-start-repl-buffer))
+    (and (get-buffer vivid-tidal-repl-buffer)
+      (kill-buffer vivid-tidal-repl-buffer))
     (select-window (sclang-ext-get-main-window))
     (delete-other-windows)
     (switch-to-buffer main-buffer)))
-(keymap-set haskell-mode-map "C-c z" #'vivid-tidal-start-kill)
+(keymap-set haskell-mode-map "C-c z" #'vivid-tidal-kill)
 
 ;;;###autoload
-(defalias 'kill-vivid-tidal 'vivid-tidal-start-kill)
+(defalias 'kill-vivid-tidal 'vivid-tidal-kill)
 
-(provide 'vivid-tidal-start)
-;;; vivid-tidal-start.el ends here
+(provide 'vivid-tidal)
+;;; vivid-tidal.el ends here

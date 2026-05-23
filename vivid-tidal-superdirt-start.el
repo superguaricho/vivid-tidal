@@ -5,8 +5,6 @@
 ;; Author: Numa Tortolero
 ;; Maintainer: Numa Tortolero
 ;; Created: vie ene 23 22:36:06 2026 (-0400)
-;; Version: 0.1.0
-;; Package-Requires: (Emacs 27.1 sclang osc sclang-ext)
 ;; URL: https://github.com/superguaricho/tidal
 ;; Keywords: (Emacs SuperCollider SuperDirt OSC)
 ;; Compatibility: Emacs 27.1 and later

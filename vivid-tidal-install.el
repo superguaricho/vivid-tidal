@@ -1,4 +1,4 @@
-;;; vivid-tidal-install.el --- Installation script for vivid-tidal
+;;; vivid-tidal-install.el --- Installation script for vivid-tidal -*- lexical-binding: t -*-
 ;;
 ;; Filename: vivid-tidal-install.el
 ;; Description: Emacs Lisp script to automate the installation of vivid-tidal.
@@ -257,13 +257,32 @@ Returns the process object."
 
 ;;;###autoload
 (defun vivid-tidal-install ()
-  "Perform the complete vivid-tidal installation.
-This chains: clone -> build -> script installation."
+  "Perform the complete vivid-tidal installation sequentially (Clone -> Build -> Scripts)."
   (interactive)
   (message "🚀 Starting vivid-tidal installation...")
-  (vivid-tidal-install-build)
-  (vivid-tidal-install-scripts))
-
+  (let ((clone-proc (vivid-tidal-install-repo)))
+    (if clone-proc
+      (set-process-sentinel
+        clone-proc
+        (lambda (p event)
+          (cond
+            ((string-match-p "finished" event)
+              (message "✅ Repo cloned. Starting build...")
+              (let ((build-proc (vivid-tidal-install-build-repo)))
+                (if build-proc
+                  (set-process-sentinel
+                    build-proc
+                    (lambda (p2 event2)
+                      (if (string-match-p "finished" event2)
+                        (progn
+                          (message "✅ vivid-tidal built successfully!")
+                          ;; Los scripts se instalan SOLO después del build con éxito
+                          (vivid-tidal-install-scripts))
+                        (message "❌ Build failed: %s" event2))))
+                  (message "❌ Could not start build process."))))
+            ((string-match-p "\\(aborted\\|exited\\|failed\\)" event)
+              (message "❌ Clone failed: %s" event)))))
+      (message "❌ Could not start clone process."))))
 ;;;;
 
 (defun vivid-tidal-install-quit-buffer ()
@@ -280,7 +299,7 @@ This chains: clone -> build -> script installation."
   "Remove Vivid-Tidal installation files and directories."
   (interactive)
   (when (file-directory-p vivid-tidal-install-dir)
-    (delete-directory vivid-tidal-install-dir t))
+    (delete-directory vivid-tidal-install-dir t))k
   (when (file-exists-p vivid-tidal-install-bash-script)
     (delete-file vivid-tidal-install-bash-script))
   (message "🧹 Vivid-Tidal installation cleaned."))

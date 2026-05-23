@@ -1,10 +1,10 @@
-#+TITLE: Vivid-Tidal-El
+#+TITLE: vivid-tidal-el
 #+AUTHOR: Numa Tortolero
 #+EMAIL: numa.tortolero@gmail.com
 #+LANGUAGE: en
 
 * Overview
-*Vivid-Tidal-El* is an Emacs interface for the [[https://github.com/superguaricho/vivid-tidal][vivid-tidal]] Haskell package. It allows you to manage and interact with all the resources of the =vivid-tidal= ecosystem directly from Emacs, facilitating a seamless live-coding workflow that combines pattern generation and sound synthesis.
+*vivid-tidal-el* is an Emacs interface for the [[https://github.com/superguaricho/vivid-tidal][vivid-tidal]] Haskell package. It allows you to manage and interact with all the resources of the =vivid-tidal= ecosystem directly from Emacs, facilitating a seamless live-coding workflow that combines pattern generation and sound synthesis.
 
 ** Key Features
 - **Haskell Package Management**: Install and uninstall the =vivid-tidal= Haskell package (which automatically includes TidalCycles and Vivid).
@@ -16,38 +16,61 @@
 - *Emacs* 27.1 or later.
 - *SuperCollider* installed and accessible in your PATH.
 - *Haskell* (GHC and Cabal) installed.
-- Emacs Dependencies: =sclang-mode=, =haskell-mode=, =osc.el=, =haskell-live=.
+- *Emacs Dependencies*: [[https://github.com/supercollider/scel][sclang-mode]], =haskell-mode=, =osc.el=, [[https://github.com/superguaricho/haskell-live][haskell-live]]. From these packages only haskell-mode and osc.el are included in MELPA.
 
 * Installation & Setup
 Follow these steps to set up your environment:
 
-** 1. Load the Package
-Add the project directory to your Emacs =load-path= and require the module:
-#+begin_src elisp
-(add-to-list 'load-path "/path/to/vivid-tidal-el")
-(require 'vivid-tidal-start)
-#+end_src
+** 1. Install vivid-tidal-el
+ * 1. Using use-package
+
+   In your init config file add:
+
+   #+begin_src elisp
+   (use-package vivid-tidal
+     :ensure t
+     :vc (:url https://github.com/superguaricho/vivid-tidal-el))
+   #+end_src
+
+   This will clone the vivid-tidal-el in your package-user-dir.
+
+ * 2 Manual
+
+   Clone your repository:
+
+   #+begin_src bash
+   $ git clone https://github.com/superguaricho/vivid-tidal-el
+   #+end_src
+
+   Add the project directory to your Emacs =load-path= and require the module:
+
+   #+begin_src elisp
+   (add-to-list 'load-path "/path/to/vivid-tidal-el")
+   (require 'vivid-tidal)
+   #+end_src
 
 ** 2. Install SuperDirt
 Run the following command to install the SuperDirt Quark (requires SuperCollider to be installed):
-=M-x vivid-tidal-superdirt-install=
+=M-x vivid-tidal-superdirt-install=.
 
 ** 3. Install the Haskell Package
 Run the following command to clone and build the =vivid-tidal= Haskell package locally:
-=M-x vivid-tidal-install=
-This will also set up the necessary GHCi scripts.
+=M-x vivid-tidal-install=.
+This will also set up the necessary GHCi scripts and install a bash script that you can call from the terminal.
 
 * Usage & Workflow
 
 ** Recommended Workflow
-1. **Start the System**: Run =M-x vivid-tidal-start= (or use the alias =M-x turpial=). This boots SuperCollider, SuperDirt, and GHCi.
+1. **Start the System**: Run =M-x vivid-tidal-start= (or use the alias =M-x tidal-start=). This boots SuperCollider, SuperDirt, and GHCi.
 2. **Live Coding**: Open a Haskell file and start writing patterns or synth interactions.
 3. **Interact**: Send code to the REPL (see [[*Interaction][Interaction]] below).
 4. **Shutdown**: Use =M-x vivid-tidal-start-kill= (or =C-c z=) to close everything cleanly.
 
 ** Interaction
-By default, you can interact with the GHCi session using standard =haskell-mode= or =haskell-live= commands:
-- **C-c C-c**: Send the current line or active region to the REPL.
+By default, you can interact with the GHCi session using standard [[https://github.com/superguaricho/haskell-live][haskell-live]] commands:
+- **C-c C-c**: Send the current line to the REPL.
+- **C-c C-e**: Send the current parraphe to the REPL.
+- **C-c C-k**: Clean the REPL.
 - **C-c z**: Kill the session and close all related buffers/processes.
 
 ** Uninstallation
@@ -63,4 +86,4 @@ Distributed under the MIT License.
 ---
 
 * Resumen (Español)
-*Vivid-Tidal-El* permite interactuar con el paquete Haskell [[https://github.com/superguaricho/vivid-tidal][vivid-tidal]] desde Emacs. Proporciona comandos para instalar localmente el paquete (incluyendo Tidal y Vivid), instalar el Quark SuperDirt, y arrancar todo el entorno sincronizado de SuperCollider y GHCi para live coding. Utiliza =M-x vivid-tidal-start= para comenzar y =C-c z= para cerrar el sistema de forma limpia.
+*vivid-tidal-el* permite interactuar con el paquete Haskell [[https://github.com/superguaricho/vivid-tidal][vivid-tidal]] desde Emacs. Proporciona comandos para instalar localmente el paquete (incluyendo Tidal y Vivid), instalar el Quark SuperDirt, y arrancar todo el entorno sincronizado de SuperCollider y GHCi para live coding. Utiliza =M-x vivid-tidal-start= para comenzar y =C-c z= para cerrar el sistema de forma limpia.
