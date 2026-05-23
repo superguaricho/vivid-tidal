@@ -299,7 +299,7 @@ Returns the process object."
   "Remove Vivid-Tidal installation files and directories."
   (interactive)
   (when (file-directory-p vivid-tidal-install-dir)
-    (delete-directory vivid-tidal-install-dir t))k
+    (delete-directory vivid-tidal-install-dir t))
   (when (file-exists-p vivid-tidal-install-bash-script)
     (delete-file vivid-tidal-install-bash-script))
   (message "🧹 Vivid-Tidal installation cleaned."))

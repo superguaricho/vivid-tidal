@@ -5,7 +5,7 @@
 ;; Author: Numa Tortolero
 ;; Maintainer: Numa Tortolero
 ;; Created: vie may  8 11:51:51 2026 (-0400)
-;; Version: 0.1.0.5
+;; Version: 0.1.0.6
 ;; Package-Requires: ((osc "0.4") (haskell-mode "17.5"))
 ;; URL: https://github.com/superguaricho/vivid-tidal-el
 ;; Keywords: haskell tidal supercollider live-coding
@@ -178,19 +178,20 @@ Synchronized via GHCi script prompt \\4."
             'vivid-tidal-startup)))
       (haskell-live-add-to-session vivid-tidal-session-name))))
 
+(declare-function vivid-tidal-start-superdirt "vivid-tidal-superdirt-start" () t)
+
 ;;;###autoload
 (defun vivid-tidal-sclang ()
   "Start sclang and wait for SuperDirt to be ready before starting vivid-tidal."
   (interactive)
   (add-to-list 'vivid-tidal-superdirt-startup-functions #'vivid-tidal-run)
+  (add-hook 'sclang-library-startup-hook #'hsc3-tidal-start-superdirt 95)
   (let ((proc (get-process sclang-process)))
     (if (and proc (process-live-p proc))
       (tidal-start-superdirt)
       (sclang-start))))
 
 (keymap-set haskell-mode-map "C-c :" #'vivid-tidal-sclang)
-
-(defalias 'turpial 'vivid-tidal-sclang)
 
 ;;;###autoload
 (defalias 'vivid-tidal 'vivid-tidal-sclang)
