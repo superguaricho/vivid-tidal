@@ -5,7 +5,7 @@
 ;; Author: Numa Tortolero
 ;; Maintainer: Numa Tortolero
 ;; Created: vie may  8 11:51:51 2026 (-0400)
-;; Version: 0.1.0.4
+;; Version: 0.1.0.5
 ;; Package-Requires: ((osc "0.4") (haskell-mode "17.5"))
 ;; URL: https://github.com/superguaricho/vivid-tidal-el
 ;; Keywords: haskell tidal supercollider live-coding
@@ -140,7 +140,7 @@ Synchronized via GHCi script prompt \\4."
                   (haskell-process-send-string p ":boot")
                   (message "🚀 Booting Tidal/Vivid environment..."))
             :complete (lambda (p _)
-                        (when (fboundp 'tidal-layout-3) (tidal-layout-3))
+                        (when (fboundp 'vivid-tidal-layouts-layout-3) (vivid-tidal-layouts-layout-3))
                         (and vivid-tidal-test
                           (haskell-process-send-string p
                             vivid-tidal-test-string))
@@ -182,14 +182,13 @@ Synchronized via GHCi script prompt \\4."
 (defun vivid-tidal-sclang ()
   "Start sclang and wait for SuperDirt to be ready before starting vivid-tidal."
   (interactive)
-  (require 'tidal-superdirt-start)
   (add-to-list 'vivid-tidal-superdirt-startup-functions #'vivid-tidal-run)
   (let ((proc (get-process sclang-process)))
     (if (and proc (process-live-p proc))
       (tidal-start-superdirt)
       (sclang-start))))
 
-(keymap-set haskell-mode-map "C-c >" #'vivid-tidal-sclang)
+(keymap-set haskell-mode-map "C-c :" #'vivid-tidal-sclang)
 
 (defalias 'turpial 'vivid-tidal-sclang)
 
@@ -231,7 +230,7 @@ Synchronized via GHCi script prompt \\4."
     (select-window (sclang-ext-get-main-window))
     (delete-other-windows)
     (switch-to-buffer main-buffer)))
-(keymap-set haskell-mode-map "C-c z" #'vivid-tidal-kill)
+(keymap-set haskell-mode-map "C-c ;" #'vivid-tidal-kill)
 
 ;;;###autoload
 (defalias 'kill-vivid-tidal 'vivid-tidal-kill)

@@ -15,10 +15,10 @@
 ;;      Ensure you have sclang (SuperCollider client) installed.
 ;;
 ;;    Usage:
-;;      From Emacs: M-x tidal-install-scel
-;;                  M-x tidal-install-superdirt
+;;      From Emacs: M-x vivid-tidal-superdirt-install-scel
+;;                  M-x vivid-tidal-superdirt-install-dirt
 ;;
-;;      Or from Emacs intend: M-x tidal-install-scel-dirt
+;;      Or from Emacs intend: M-x vivid-tidal-superdirt-install
 ;;
 ;;      This last will intend install scel and superdirt.
 ;;
@@ -26,7 +26,6 @@
 ;;; Code:
 
 (require 'osc)
-(require 'tidal-osc)
 
 (defgroup vivid-tidal-superdirt-install nil
   "Installation utilities for SuperDirt and scel."

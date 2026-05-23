@@ -5,9 +5,7 @@
 ;; Author: Numa Tortolero
 ;; Maintainer: Numa Tortolero
 ;; Created: vie ene 23 22:36:06 2026 (-0400)
-;; URL: https://github.com/superguaricho/tidal
-;; Keywords: (Emacs SuperCollider SuperDirt OSC)
-;; Compatibility: Emacs 27.1 and later
+;; URL: https://github.com/superguaricho/vivid-tidal
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -24,15 +22,7 @@
 ;;; Code:
 
 (require 'sclang)
-(require 'tidal-osc)
 (require 'vivid-tidal-superdirt-install)
-
-(declare-function haskell-interactive-switch "haskell")
-
-(add-to-list 'load-path
-  (file-name-directory (or load-file-name buffer-file-name)))
-
-(setq sclang-show-workspace-on-startup nil)
 
 ;;;###autoload
 (defvar vivid-tidal-superdirt-startup-functions nil
@@ -83,6 +73,7 @@
 (defun vivid-tidal-start-superdirt ()
   "Start SuperDirt with extended memory options."
   (interactive)
+  (remove-hook 'sclang-library-startup-hook 'vivid-tidal-start-superdirt)
   (vivid-tidal-start-emacs-osc-listener)
   (message "📡 Enviando configuración de SuperDirt a SCLang (port 7777)...")
   (sclang-eval-string
@@ -102,7 +93,7 @@ s.waitForBoot {
     SuperDirt.default = ~dirt;
     s.latency = 0.8;
 
-    // --- Vivid: Reload Listener (Robust) ---
+    // --- Vivid: Reload Listener ---
     fork {
         thisProcess.openUDPPort(57120);
         0.1.wait;
@@ -127,8 +118,6 @@ s.waitForBoot {
     };
 };
 )"))
-
-(add-hook 'sclang-library-startup-hook #'vivid-tidal-start-superdirt 95)
 
 (provide 'vivid-tidal-superdirt-start)
 ;;; vivid-tidal-superdirt-start.el ends here
