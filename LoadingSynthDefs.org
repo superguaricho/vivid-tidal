@@ -59,8 +59,10 @@ To integrate your Vivid sounds into TidalCycles:
    -- From Examples
    d1 $ s "vividBass*4" # n "c2 g2"
    
-   -- From Cymbals (using aliases defined in BootVivid.hs)
-   d2 $ vcyms # sustain 3 # gain 0.8
+   -- From Cymbals
+   d1 $ s "vividRide" # sustain 2 # gain 1.2
+   
+   d2 $ s "vividCymS" # sustain 3 # gain 0.8
    #+END_SRC
 
 * Technical Notes

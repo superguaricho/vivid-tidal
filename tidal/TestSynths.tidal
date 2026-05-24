@@ -57,11 +57,22 @@ d5 $ s "vividNoise" # noiseType 1 # cutoff (range 100 5000 $ slow 8 V.saw) # rq 
 -- 4. CYMBALS (Dan Stowell Model)
 ------------------------------------------------------------------------
 
+-- vividRide: Bright Jazz Ride (Focused on "ping")
+d1 $ s "vividRide [vividRide*2]" # sustain "1 0.5" # gain 1.2
+
 -- vividCym: Pure cymbal resonance (Bwoosh)
 d1 $ s "vividCym*4" # sustain 5 # gain 0.8
 
 -- vividCymS: Cymbal with stick impact (Stick)
 d2 $ s "vividCymS*2" # sustain 3 # gain 0.9 # pan "0 1 0.5"
+
+-- vividCymSusp: Suspended Cymbal (soft mallets)
+-- Try with long sustain for a gentle crescendo/decrescendo
+d3 $ s "vividCymSusp/2" # sustain 8 # gain 0.7 # pan (slow 4 sine)
+
+-- vividCymSplash: Orchestral Splash/Clash Cymbal
+-- Explosive and chaotic attack
+d4 $ s "vividCymSplash*4" # sustain 1 # gain 0.8 # speed 1.5
 
 ------------------------------------------------------------------------
 -- 5. GRANULAR SYNTHESIS (Clouds)
