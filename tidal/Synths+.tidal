@@ -1,0 +1,166 @@
+-- COMMON PARAMETERS (reused across other synths)
+
+freq = pF "freq"
+amp = pF "amp"
+atk = pF "atk"
+dec = pF "dec"
+sus = pF "sus"
+rel = pF "rel"
+res = pF "res"
+fatk = pF "fatk"
+fdec = pF "fdec"
+fsus = pF "fsus"
+frel = pF "frel"
+famt = pF "famt"
+synthCutoff = pF "synthCutoff"
+synthResonance = pF "synthResonance"
+
+-- FM SIMPLE
+
+ratio1 = pF "ratio1"
+ratio2 = pF "ratio2"
+ratio3 = pF "ratio3"
+ratio4 = pF "ratio4"
+index1 = pF "index1"
+index2 = pF "index2"
+index3 = pF "index3"
+index4 = pF "index4"
+
+d1 $
+    fast 2 $
+        note "20 3 7 10 15 19"
+            # s "fmsimple"
+            # ratio1 1
+            # ratio2 "5.9 2.1"
+            # ratio3 "3.3 1.1"
+            # ratio4 "9.1 4.5"
+            # index1 1.6
+            # index2 1.6
+            # index3 1.9
+            # index4 1
+            # atk 0 -- amp envelope
+            # dec 0.5
+            # sus 2
+            # rel 1
+            # synthCutoff 200
+            # synthResonance 0.5
+            # famt 2000 -- filter envelope amount
+            # fatk 0.1 -- filter envelope parameters
+            # fdec 0.5
+            # fsus 1
+            # frel 1
+            # amp 0.5
+            # room 0.4
+            # size 0.5
+
+hush
+
+-- ACID 303
+envAmt  = pF "envAmt"
+accent  = pF "accent"
+slide   = pF "slide"
+wave    = pF "wave"
+dist    = pF "dist"
+
+d1 $
+  n "[0 3 7 10]*4"
+  # octave 4
+  # s "acid303"
+  # synthCutoff 200
+  # synthResonance "0.10"
+  # envAmt 500
+  # accent "0 2 5"
+  # slide 0.1
+  # decay 2.18
+  # amp 0.3
+  # wave "0" -- 0 saw 1 square
+  # dist 0.1
+  # room 0.4
+  # size 0.5
+
+  hush
+
+  -- phaseMorph
+
+morph   = pF "morph"
+pmIndex = pF "pmIndex"
+
+d1
+  $ fast 2
+  $ note "20 3 7 10 15 19"
+  # s "phaseMorph"
+  # morph 1 -- timbre parameter
+  # pmIndex 2 -- timbre parameter
+  # atk 0 -- amp envelope
+  # dec 0.5
+  # sus 2
+  # rel 1
+  # synthCutoff 200
+  # synthResonance 0.5
+  # famt 2000 -- filter envelope
+  # fatk 0.1
+  # fdec 0.5
+  # fsus 1
+  # frel 1
+  # amp 0.5
+  # room 0.4
+  # size 0.5
+
+  hush
+
+
+-- percGenerator
+
+let spg_attack      = pF "spg_attack"
+let spg_decay       = pF "spg_decay"
+
+let spg_pitchEnvAmt = pF "spg_pitchEnvAmt"
+let spg_pitchDecay  = pF "spg_pitchDecay"
+
+let spg_wave        = pF "spg_wave"
+let spg_tone        = pF "spg_tone"
+
+let spg_fm          = pF "spg_fm"
+let spg_fmFreq      = pF "spg_fmFreq"
+
+let spg_noise       = pF "spg_noise"
+let spg_noiseTone   = pF "spg_noiseTone"
+let spg_noiseBand   = pF "spg_noiseBand"
+
+let spg_cutoff      = pF "spg_cutoff"
+let spg_resonance   = pF "spg_resonance"
+
+let spg_drive       = pF "spg_drive"
+
+let spg_click       = pF "spg_click"
+
+
+d2
+      $ slow 2
+      $ n "0(9,12)"
+      # s "percGenerator"
+      # freq "120 60"
+      # spg_attack 0.001
+      # spg_decay "0.35 2 1.5 1.8!3"
+      # spg_pitchEnvAmt "220 100 300 100 200"
+      # spg_pitchDecay 0.05
+      # spg_wave "3 3 0!2"
+      -- tipo de oscilador:
+      -- 0 sine | 1 saw | 2 pulse | 3 FM osc
+      # spg_tone 0.7
+      # spg_fm "9 <1.6 3> <2.7!2 9>"
+      # spg_fmFreq "420 100 900"
+      # spg_noise 0.1
+      # spg_noiseTone "4800 200 1000"
+      # spg_noiseBand "0.5 2 1.5 1"
+      # spg_cutoff "5000 4500 7000!4"
+      # spg_resonance "0.3 0.5 0.7 0.1!5"
+      # spg_drive "0.4 0.1 0.2 0.5"
+      # spg_click "2 0.35 0 1"
+      # sustain 1
+      # cut 1
+      # amp 0.5
+      # gain 0.7
+     --  # verb 0.7 (slow 2 "0.5 0.7 0.5!2 0.6 0.5") 0.5 0.5 (optional, MI verb required)
+
+hush

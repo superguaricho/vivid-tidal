@@ -1,0 +1,24 @@
+#+TITLE: Vivid Clean State Management
+#+AUTHOR: Gemini CLI & Numa Tortolero
+
+* The Problem: Out-of-Sync Internal State
+Vivid maintains an internal "ledger" of allocated resources in Haskell that is independent of the SuperCollider server's actual state. This leads to several issues when working interactively (REPL/GHCi):
+
+** Node ID Clashes
+Vivid tracks the next available Node ID in a ~TVar~. If the SC server is reset (e.g., via ~freeAll~ or a restart) but the Haskell process is not, Vivid will continue requesting IDs from where it left off (e.g., 1005, 1006...). Eventually, after several resets or if another client (like Sclang/SuperDirt) uses those IDs, a collision occurs, resulting in "Node ID already in use" errors.
+
+** SynthDef "Forgetfulness"
+Vivid keeps a ~Set~ of ~SDName~ hashes that have already been sent to the server (~_scServerState_definedSDs~). If the server is restarted, it loses all SynthDefs, but Haskell "thinks" they are still there and won't re-send them, leading to silent synths.
+
+* The Solution: Hard Reset via STM
+The ~setupVivid~ function implemented in this project performs a manual "Hard Reset" of Vivid's internal state using ~STM~ (Software Transactional Memory) and the ~containers~ package.
+
+** Steps performed by ~setupVivid~:
+1. *Disconnect*: Closes any existing socket connections.
+2. *Reset Allocators*: Manually overwrites the ~TVar~s for Node IDs, Buffer IDs, and Sync IDs back to their initial default ranges.
+3. *Clear Registry*: Empties the ~Set~ of defined SynthDefs, forcing Vivid to re-upload definitions on the next ~synth~ call.
+4. *Reconnect*: Establishes a fresh connection to ~scsynth~.
+5. *Server Cleanup*: Sends a global ~freeAll~ to the SC server to ensure it matches the now-clean Haskell state.
+
+* Implementation Details
+This required adding ~stm~ and ~containers~ to the project dependencies to access the low-level state manipulation functions (~atomically~, ~writeTVar~) and data structures (~Set~, ~Map~).

@@ -1,0 +1,113 @@
+-- GUIDE: TidalCycles Parameters for Vivid Synths
+-- Copy and execute these definitions in your Tidal REPL (GHCi) first:
+
+let grainDensity = pF "grainDensity"
+    grainDur = pF "grainDur"
+    freqVar = pF "freqVar"
+    cutoff = pF "cutoff"
+    rq = pF "rq"
+    modIndex = pF "modIndex"
+    modRatio = pF "modRatio"
+    revMix = pF "revMix"
+    revRoom = pF "revRoom"
+    pos = pF "pos"
+    glideTime = pF "glideTime"
+    noiseType = pF "noiseType"
+    beatsPerSec = pF "beatsPerSec"
+    decayScale = pF "decayScale"
+
+
+------------------------------------------------------------------------
+-- 1. SUBTRACTIVE & ANALOG
+------------------------------------------------------------------------
+
+-- vividBass: Saw wave with resonant low-pass
+-- Parameters: cutoff, rq
+d1 $ s "vividBass*7" # n "g3 c4 f4 c4 g3 f3 c4 b3" # cutoff 300 # rq 0.2 # sustain 0.5
+
+-- vividGlide: Linear pitch glide using Tidal's native 'accelerate'
+d2 $ s "vividGlide/2" # n 40 # accelerate 1 # sustain 1
+
+-- vividSlide: Advanced exponential pitch glide
+-- Parameters: glideTime, accelerate
+d3 $ s "vividSlide*3" # n "30 42" # accelerate 1 # glideTime 0.2 # sustain 0.8
+
+hush
+
+------------------------------------------------------------------------
+-- 2. DIGITAL & FM
+------------------------------------------------------------------------
+
+-- vividFM: 2-operator Frequency Modulation
+-- Parameters: modIndex (intensity), modRatio (harmonic relation)
+d4 $ s "vividFM*5" # n "40 45 47 52" # modIndex 15 # modRatio 2.5 # sustain 0.4
+
+------------------------------------------------------------------------
+-- 3. NOISE & TEXTURE
+------------------------------------------------------------------------
+
+-- vividHats: Classic percussive white noise with HPF
+d5 $ s "vividHats*8" # sustain 0.03 # cutoff 12000 # pan (slow 4 sine)
+
+-- vividNoise: Filtered Noise Selection
+-- Parameters: noiseType (0:White, 1:Pink, 2:Brown), cutoff, rq
+d5 $ s "vividNoise" # noiseType 1 # cutoff (range 100 5000 $ slow 8 V.saw) # rq 0.05 # sustain 1
+
+------------------------------------------------------------------------
+-- 4. CYMBALS (Dan Stowell Model)
+------------------------------------------------------------------------
+
+-- vividCym: Pure cymbal resonance (Bwoosh)
+d1 $ s "vividCym*4" # sustain 5 # gain 0.8
+
+-- vividCymS: Cymbal with stick impact (Stick)
+d2 $ s "vividCymS*2" # sustain 3 # gain 0.9 # pan "0 1 0.5"
+
+------------------------------------------------------------------------
+-- 5. GRANULAR SYNTHESIS (Clouds)
+------------------------------------------------------------------------
+
+-- vividCloud: Pure synthesis granular cloud
+-- Parameters: grainDensity, grainDur, freqVar
+d1 $ s "vividCloud" # n 10 # grainDensity 40 # grainDur 0.05 # freqVar 200 # sustain 2
+
+-- vividCloudRev: Cloud with built-in FreeVerb
+-- Parameters: revMix (0-1), revRoom (0-1)
+d2 $ s "vividCloudRev" # n 31 # grainDensity 60 # revMix 0.7 # revRoom 0.9 # sustain 4
+
+-- vividGrainBeat: Synchronous rhythmic granulation
+-- Parameters: beatsPerSec (trigger rate), grainDur
+d3 $ s "vividGrainBeat" # n 440 # beatsPerSec 16 # grainDur 0.05 # sustain 2
+
+-- vividGrains: Advanced cloud with frequency and size jitter
+-- Parameters: freqVar (random pitch range)
+d3 $ s "vividGrains" # n 40 # grainDensity 50 # freqVar 150 # grainDur 0.1 # sustain 3
+
+-- vividGrainFilter: Granular cloud with per-grain resonant filtering
+-- Parameters: cutoff, rq
+d1 $ s "vividGrainFilter" # n 30 # grainDensity 40 # cutoff 1500 # rq 0.1 # sustain 2
+
+------------------------------------------------------------------------
+-- 6. PHYSICAL MODELING & RESONATORS
+------------------------------------------------------------------------
+
+-- vividMetallic: Resonator bank for metallic textures
+-- Parameters: decayScale (ring time multiplier)
+d7 $ s "vividMetallic*4" # n "30 35 42 32" # decayScale 2 # sustain 1 # gain 1.2
+
+-- Rhythmic metallic textures
+d1 $ s "vividMetallic*8" # n (run 8) # decayScale (range 0.1 3 $ slow 4 sine) # sustain 0.1
+
+------------------------------------------------------------------------
+-- 7. GRANULAR SAMPLING (Manipulation)
+------------------------------------------------------------------------
+
+-- vividSampler: Use Tidal samples with a granular engine
+-- Parameters: grainDensity, grainDur
+d2 $ s "vividSampler" # sound "bd" # grainDensity 80 # grainDur 0.04 # sustain 1
+
+-- vividWarp: Independent pitch and time stretching
+-- Parameters: pos (scanning speed: 1=normal, 0.1=slow), speed (pitch)
+d3 $ s "~ vividWarp" # sound "cp" # pos 0.05 # speed 0.8 # sustain 4
+
+hush

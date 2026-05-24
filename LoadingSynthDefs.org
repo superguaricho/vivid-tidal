@@ -1,0 +1,69 @@
+#+TITLE: Loading Vivid SynthDefs into SuperDirt
+#+AUTHOR: Gemini CLI & Numa Tortolero
+
+* The Challenge: Bridging the Gap
+Vivid (Haskell) communicates directly with the SuperCollider audio server (~scsynth~) via OSC. However, TidalCycles relies on SuperDirt, which runs in the SuperCollider language interpreter (~sclang~). For a Vivid synth to be used in a Tidal pattern, ~sclang~ must be aware of its definition, parameters, and metadata.
+
+Initially, sending the SynthDef binary directly to the server's memory was insufficient because ~sclang~'s internal ~SynthDescLib~ did not automatically register it, leading to "instrument not found" errors in SuperDirt.
+
+* The Solution: File-Based Synchronization
+The most sound way to register SynthDefs across both ~scsynth~ and ~sclang~ is by writing the definition to disk and then triggering a reload.
+
+** 1. Haskell Side (Vivid)
+Haskell now performs two actions during a reload:
+- *Persistence*: It serializes the ~SynthDef~ into a ~.scsyndef~ binary file and saves it directly to SuperCollider's default synthdef directory (~/.local/share/SuperCollider/synthdefs/~).
+- *Notification*: It sends a custom OSC message (~/vivid/reload~) to SuperCollider (port 57120) to signal that the file is ready.
+
+** 2. SuperCollider Side (SuperDirt)
+A persistent ~OSCFunc~ listener in ~sclang~ handles the notification:
+- It reads the specific file from disk using ~SynthDescLib.global.read(path)~.
+- It explicitly injects the new instrument into the active SuperDirt instance using ~~dirt.addModule(\name, ())~.
+
+* SuperDirt Compatible Structure
+For a Vivid SynthDef to work seamlessly with Tidal patterns, it must follow SuperDirt's parameter convention:
+- ~out~: The output bus (provided by SuperDirt for global effects processing).
+- ~sustain~: Used to scale the duration of the synth's envelope.
+- ~pan~: Tidal sends this in the [0, 1] range; the SynthDef must map it to the [-1, 1] range required by ~pan2~.
+- ~freq~: The target frequency calculated by Tidal from note numbers (~n~).
+
+** Advanced Synthesis: The Cymbal Case
+The module ~Vivid.Tidal.Cymbals~ implements complex synthesis (Dan Stowell's cymbal model) using Vivid. This demonstrates how to handle large filter banks (~klank~) and multi-layered excitation drivers.
+
+*Key requirements for complex synths*:
+- **Explicit Typing**: In Vivid, parameters for UGens like ~klank~ must be explicitly annotated (e.g., ~:: Float~) to avoid ambiguity.
+- **Stereo Panning**: Always use ~pan2~ mapped from Tidal's ~[0, 1]~ to SuperCollider's ~[-1, 1]~.
+
+** Example Implementation (Cymbal Stick):
+#+BEGIN_SRC haskell
+-- The name "vividCymS" is what SuperDirt will recognize
+vividCymbalWithStick = sdNamed "vividCymS" (0::I "out", 5::I "sustain", 0::I "pan") $ do
+   -- ... envelopes and drivers ...
+   let klankSpecs = [ (f, (1.0/100.0)::Float, 1.0::Float) | f <- expFreqs ]
+   res <- klank (in_ (lodriver ~+ hidriver ~+ thwack)) klankSpecs
+   -- ... stereo output ...
+   s <- pan2 (in_ sig, pos_ (p ~* (2::Float) ~- (1::Float)))
+   out (V::V "out") s
+#+END_SRC
+
+* Workflow
+To integrate your Vivid sounds into TidalCycles:
+
+1. **Define**: Update your SynthDef in ~src/Vivid/Tidal/Examples.hs~ or ~src/Vivid/Tidal/Cymbals.hs~.
+2. **Load & Boot**: Use the unified boot script to start your environment:
+   #+BEGIN_SRC haskell
+   ghci> :script BootVivid.hs
+   #+END_SRC
+   This loads all modules (~Vivid.Tidal~, ~Examples~, ~Cymbals~) and starts the Tidal stream.
+3. **Play**: Use the synth name directly or the aliases (~vcym~, ~vcyms~) in Tidal:
+   #+BEGIN_SRC tidal
+   -- From Examples
+   d1 $ s "vividBass*4" # n "c2 g2"
+   
+   -- From Cymbals (using aliases defined in BootVivid.hs)
+   d2 $ vcyms # sustain 3 # gain 0.8
+   #+END_SRC
+
+* Technical Notes
+- **Names**: SuperDirt registers the name defined in ~sdNamed~.
+- **Sync**: ~vividReload~ is asynchronous. Wait a brief moment after reloading before triggering the sound.
+- **Stability**: Using file-based sync prevents Node ID collisions and ensures metadata is consistent between Haskell and SuperCollider.

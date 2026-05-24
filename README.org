@@ -1,84 +1,61 @@
-#+TITLE: vivid-tidal-el
+#+TITLE: vivid-tidal
 #+AUTHOR: Numa Tortolero
 #+EMAIL: numa.tortolero@gmail.com
 #+LANGUAGE: en
 
 * Overview
-*vivid-tidal-el* is an Emacs interface for the [[https://github.com/superguaricho/vivid-tidal][vivid-tidal]] Haskell package. It allows you to manage and interact with all the resources of the =vivid-tidal= ecosystem directly from Emacs, facilitating a seamless live-coding workflow that combines pattern generation and sound synthesis.
+=vivid-tidal= is a bridge between *Vivid* (Haskell SuperCollider DSL) and *TidalCycles*. It allows you to define SuperCollider =SynthDef=s using the Vivid DSL and seamlessly use them in your live coding sessions with Tidal.
 
-** Key Features
-- **Haskell Package Management**: Install and uninstall the =vivid-tidal= Haskell package (which automatically includes TidalCycles and Vivid).
-- **SuperCollider Integration**: Install the =SuperDirt= Quark and manage =sclang= processes.
-- **Automated Environment**: Boot SuperCollider and GHCi with all necessary modules and synchronization.
-- **Live Coding**: Send code blocks and lines from Emacs buffers to the synchronized GHCi session.
+This project focuses on providing a robust synchronization mechanism between the Haskell creative environment and the SuperCollider audio server.
 
-* Prerequisites
-- *Emacs* 27.1 or later.
-- *SuperCollider* installed and accessible in your PATH.
-- *Haskell* (GHC and Cabal) installed.
-- *Emacs Dependencies*: [[https://github.com/supercollider/scel][sclang-mode]], =haskell-mode=, =osc.el=, [[https://github.com/superguaricho/haskell-live][haskell-live]]. From these packages only haskell-mode and osc.el are included in MELPA.
+* Architecture: Three-Layer Synchronization
+The core of this project is a sound synchronization mechanism that connects three distinct layers:
 
-* Installation & Setup
-Follow these steps to set up your environment:
+1. **/Haskell (Vivid)/**: The creative layer where SynthDefs are defined using Vivid. It handles the persistence of definitions to disk and notifies the other layers.
+2. **/scsynth (Audio Server)/**: The real-time engine that receives binary SynthDefs and generates sound.
+3. **/sclang (SuperDirt)/**: The interpreter that acts as the “brain” for TidalCycles. It maintains a dictionary of instruments and maps Tidal patterns to server commands.
 
-** 1. Install vivid-tidal-el
- * 1. Using use-package
+** Features
+- *Standard SuperDirt Integration*: Automatically maps Tidal parameters (=freq=, =sustain=, =pan=) to Vivid UGens.
+- *Hot-Reloading*: Sends =SynthDef=s directly to the server and notifies =sclang/SuperDirt= to register them instantly.
+- *Persistence*: Writes =.scsyndef= files to the SuperCollider directory (~/.local/share/SuperCollider/synthdefs/~) so SuperDirt can read parameter metadata.
+- *Cymbal Synthesis*: Includes an advanced implementation of Dan Stowell's cymbal model.
 
-   In your init config file add:
+** Prerequisites
+- *Haskell*: GHC 9.6.x (via =cabal=).
+- *SuperCollider* with the *SuperDirt* quark installed.
+- *TidalCycles* (Haskell library) for pattern sequencing.
 
-   #+begin_src elisp
-   (use-package vivid-tidal
-     :ensure t
-     :vc (:url https://github.com/superguaricho/vivid-tidal-el))
+** Usage Workflow
+1. *Boot SuperCollider*: In a terminal run =superdirt_start.scd= in SC:
+
+   #+begin_src sh
+   cd /path/to/vivid-tidal
+   sclang superdirt_start.scd
    #+end_src
 
-   This will clone the vivid-tidal-el in your package-user-dir.
+2. *Start GHCI*: In other terminal:
 
- * 2 Manual
-
-   Clone your repository:
-
-   #+begin_src bash
-   $ git clone https://github.com/superguaricho/vivid-tidal-el
+   #+begin_src sh
+   cd /path/to/vivid-tidal
+   cabal repl
    #+end_src
 
-   Add the project directory to your Emacs =load-path= and require the module:
+3. **Boot the Environment**: Execute =:boot= in the GHCi session. This loads all modules (including Cymbals), defines all custom parameters (~pF~), and starts Tidal.
 
-   #+begin_src elisp
-   (add-to-list 'load-path "/path/to/vivid-tidal-el")
-   (require 'vivid-tidal)
+4. **Play**: Try your first pattern:
+   #+begin_src tidal
+   d1 $ s "vividCymS*4" # sustain 0.5
    #+end_src
 
-** 2. Install SuperDirt
-Run the following command to install the SuperDirt Quark (requires SuperCollider to be installed):
-=M-x vivid-tidal-superdirt-install=.
-
-** 3. Install the Haskell Package
-Run the following command to clone and build the =vivid-tidal= Haskell package locally:
-=M-x vivid-tidal-install=.
-This will also set up the necessary GHCi scripts and install a bash script that you can call from the terminal.
-
-* Usage & Workflow
-
-** Recommended Workflow
-1. **Start the System**: Run =M-x vivid-tidal-start= (or use the alias =M-x tidal-start=). This boots SuperCollider, SuperDirt, and GHCi.
-2. **Live Coding**: Open a Haskell file and start writing patterns or synth interactions.
-3. **Interact**: Send code to the REPL (see [[*Interaction][Interaction]] below).
-4. **Shutdown**: Use =M-x vivid-tidal-start-kill= (or =C-c z=) to close everything cleanly.
-
-** Interaction
-By default, you can interact with the GHCi session using standard [[https://github.com/superguaricho/haskell-live][haskell-live]] commands:
-- **C-c C-c**: Send the current line to the REPL.
-- **C-c C-e**: Send the current parraphe to the REPL.
-- **C-c C-k**: Clean the REPL.
-- **C-c z**: Kill the session and close all related buffers/processes.
-
-** Uninstallation
-To remove the local Haskell installation and scripts:
-=M-x vivid-tidal-install-clean-installation=
+** Troubleshooting
+If GHCi shows a warning like =*** WARNING: . is writable by someone else, IGNORING!=, it means the directory permissions are too open for GHCi's security policy. You can fix this by running:
+#+begin_src sh
+chmod go-w . .ghci
+#+end_src
 
 * Synthesizer Details
-For detailed instructions on how to create and manage Synths using Vivid within this environment, please refer to the documentation in the [[https://github.com/superguaricho/vivid-tidal][vivid-tidal Haskell repository]].
+For detailed instructions on how to create and manage Synths using Vivid, please refer to [[file:LoadingSynthDefs.org][LoadingSynthDefs.org]].
 
 * License
 Distributed under the MIT License.
@@ -86,4 +63,11 @@ Distributed under the MIT License.
 ---
 
 * Resumen (Español)
-*vivid-tidal-el* permite interactuar con el paquete Haskell [[https://github.com/superguaricho/vivid-tidal][vivid-tidal]] desde Emacs. Proporciona comandos para instalar localmente el paquete (incluyendo Tidal y Vivid), instalar el Quark SuperDirt, y arrancar todo el entorno sincronizado de SuperCollider y GHCi para live coding. Utiliza =M-x vivid-tidal-start= para comenzar y =C-c z= para cerrar el sistema de forma limpia.
+=vivid-tidal= conecta *Vivid* (Haskell) y *TidalCycles*. Define =SynthDef=s en Haskell y úsalos en Tidal.
+
+** Workflow:
+1. **SC**: Inicia =sclang superdirt_start.scd=.
+2. **GHCI**: =cabal repl= -> =:boot=.
+3. **Diversión**: =d1 $ s "vividCymS*4"=.
+
+Si hay errores de permisos en GHCI, usa: =chmod go-w . .ghci=.

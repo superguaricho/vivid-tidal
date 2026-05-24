@@ -1,0 +1,5 @@
+-- Define :boot command to load the unified environment
+:def boot (\_ -> return ":script BootVivid.hs")
+
+-- Informational message on startup
+putStrLn "✨ vivid-tidal REPL ready. Type :boot to start the environment."
